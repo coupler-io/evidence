@@ -1,0 +1,97 @@
+cli/cli/connection/load-config.ts
+  s_fb9b7e07d46d4a::t_cb6d215036be48 172,175
+  s_fb9b7e07d46d4a::t_d147e2357506ad 24,35,173-174
+  s_fb9b7e07d46d4a::t_fb5084ad1481d2 176-177
+docs/docs.json
+  s_fb9b7e07d46d4a::t_d147e2357506ad 804
+  s_fb9b7e07d46d4a::t_2c31a935364ac3 803
+core/src/connectors/connection-schema.ts
+  s_fb9b7e07d46d4a::t_d147e2357506ad 39-41,134-135,146,171,182
+  s_fb9b7e07d46d4a::t_d3b78932a0eded 38,133,145,157,170,181
+  s_fb9b7e07d46d4a::t_cb6d215036be48 158
+  s_fb9b7e07d46d4a::t_18ad0defdd785c 42
+cli/cli/init/connection-template.ts
+  s_fb9b7e07d46d4a::t_3764866db3e960 23,140-143,145-148,157
+  s_fb9b7e07d46d4a::t_cb6d215036be48 24,137
+  s_fb9b7e07d46d4a::t_1fa53fc741e535 138-139,144
+  s_fb9b7e07d46d4a::t_d147e2357506ad 136,158
+core/src/user-components/tags/table_filter/table_filter.markdoc.spec.ts
+  s_fb9b7e07d46d4a::t_cb6d215036be48 452,587,599
+  s_fb9b7e07d46d4a::t_eb1a68e322af50 586,598
+  s_fb9b7e07d46d4a::t_1e9e142ef02324 451
+core/src/connectors/schema-allowlist.ts
+  s_fb9b7e07d46d4a::t_ea7eddcc693457 5-7
+core/src/connectors/coupler-io/connection-schema.ts
+  s_fb9b7e07d46d4a::t_d147e2357506ad 1,3-8,10-29,31-36,39-41,58-68,72-74,76-79,81-83,85-106,109-110
+  s_fb9b7e07d46d4a::t_59a498929139d6 2,9,30,37-38,42-57,69-71,75,80,84,107-108
+core/src/user-components/interfaces/query-service.ts
+  s_fb9b7e07d46d4a::t_d3b78932a0eded 49-50
+core/src/connectors/warehouse-mode.ts
+  s_fb9b7e07d46d4a::t_d3b78932a0eded 16
+  s_fb9b7e07d46d4a::t_cb6d215036be48 17
+core/src/connectors/coupler-io/resolve.ts
+  s_fb9b7e07d46d4a::t_1f440a582bdd3d 1-9,13,17-43,46,48,50,52-53
+  s_fb9b7e07d46d4a::t_d147e2357506ad 10-12,14-16,44-45,47,49,51,54-56
+core/src/sql-dialect.ts
+  s_fb9b7e07d46d4a::t_d147e2357506ad 18,28,61
+  s_fb9b7e07d46d4a::t_cb6d215036be48 42,60
+  s_fb9b7e07d46d4a::t_d3b78932a0eded 41
+core/src/connectors/coupler-io/credentials.ts
+  s_fb9b7e07d46d4a::t_d147e2357506ad 1-13
+docs/direct-connectors/coupler-io.mdx
+  s_fb9b7e07d46d4a::t_1fa53fc741e535 21-29,31-32,41,59-63,72,75
+  s_fb9b7e07d46d4a::t_d147e2357506ad 1-20,30,33-40,42-58,64-71,73-74,76-88
+cli/cli/connection/types.ts
+  s_fb9b7e07d46d4a::t_d147e2357506ad 18,42,53
+  s_fb9b7e07d46d4a::t_d3b78932a0eded 43,52
+cli/cli/connection/coupler-io.ts
+  s_fb9b7e07d46d4a::t_d147e2357506ad 1-8,12-54,56-133,145-264,286-296,299-309
+  s_fb9b7e07d46d4a::t_1fa53fc741e535 9-11,55,134-144,265-285
+  s_fb9b7e07d46d4a::t_c872e697d6b781 297-298
+core/src/connectors/coupler-io/sql.test.ts
+  s_fb9b7e07d46d4a::t_d147e2357506ad 1-95,97-101,103-107,109-110,112-116,118-175
+  s_fb9b7e07d46d4a::t_c139461af955fb 96,102,108,111,117
+core/src/connectors/coupler-io/sql.ts
+  s_fb9b7e07d46d4a::t_d147e2357506ad 1-198,203-281
+  s_fb9b7e07d46d4a::t_c139461af955fb 199-202
+cli/cli/connection/load-config.test.ts
+  s_fb9b7e07d46d4a::t_2ded46ebf94c34 238,249
+  s_fb9b7e07d46d4a::t_f3d109533333a5 262-308
+  s_fb9b7e07d46d4a::t_97d4500abdae95 228-229,231-232,234-237,239-243,245-248,250-253,255-258,260-261,309-310
+  s_fb9b7e07d46d4a::t_cb6d215036be48 227,230,233,244,254,259
+core/src/metadata/inline-query-metadata.svelte.ts
+  s_fb9b7e07d46d4a::t_cb6d215036be48 154
+  s_fb9b7e07d46d4a::t_d3b78932a0eded 153
+core/src/sql-dialect/coupler-io.ts
+  s_fb9b7e07d46d4a::t_d147e2357506ad 1-10
+core/src/metadata/Metadata.svelte.ts
+  s_fb9b7e07d46d4a::t_3764866db3e960 238,279-280,666-672,674-698,701
+  s_fb9b7e07d46d4a::t_d147e2357506ad 13,278,665,673
+  s_fb9b7e07d46d4a::t_cb6d215036be48 239,277
+  s_fb9b7e07d46d4a::t_dd6ab936749934 699-700,702-703
+cli/src/lib/server/run-query.ts
+  s_fb9b7e07d46d4a::t_cb6d215036be48 56
+  s_fb9b7e07d46d4a::t_3764866db3e960 57-58
+cli/cli/connection/index.ts
+  s_fb9b7e07d46d4a::t_cb6d215036be48 40,149
+  s_fb9b7e07d46d4a::t_d3b78932a0eded 150
+  s_fb9b7e07d46d4a::t_d147e2357506ad 14,41,151
+core/src/sql-dialect/motherduck.ts
+  s_fb9b7e07d46d4a::t_7eb69af962301d 32
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "5b5e36d7c1cc72c5d0eb68f93c3f8f692e0a0550",
+  "prompts": {},
+  "sessions": {
+    "s_fb9b7e07d46d4a": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "812bb402-e1c6-4745-828f-fbcfb9d33728",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Olexander Paladiy <olexander.paladiy@railsware.com>"
+    }
+  }
+}

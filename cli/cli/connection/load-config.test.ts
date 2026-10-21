@@ -224,6 +224,90 @@ describe('loadConnectionConfig', () => {
 		});
 	});
 
+	describe('coupler-io', () => {
+		it('parses a dataset map and defaults to production hosts', async () => {
+			await writeYaml(
+				`type: coupler-io\ntoken: t0k\nworkspace_id: 1042\ndatasets:\n  funnel: 1654ea41-37bf-48b2-8256-87c5ea3c5a90\n`
+			);
+			expect(await loadConnectionConfig(workDir)).toEqual({
+				type: 'coupler-io',
+				token: 't0k',
+				workspaceId: '1042',
+				apiHost: 'https://api.coupler.io',
+				queryHost: 'https://services.coupler.io',
+				tables: { funnel: '1654ea41-37bf-48b2-8256-87c5ea3c5a90' }
+			});
+		});
+
+		it('accepts host overrides and strips trailing slashes', async () => {
+			await writeYaml(
+				`type: coupler-io\ntoken: t\nworkspace_id: "9"\napi_host: https://api.couplerstaging.dev/\nquery_host: https://services.couplerstaging.dev\n`
+			);
+			expect(await loadConnectionConfig(workDir)).toMatchObject({
+				apiHost: 'https://api.couplerstaging.dev',
+				queryHost: 'https://services.couplerstaging.dev',
+				tables: {}
+			});
+		});
+
+		it('rejects a non-https host', async () => {
+			await writeYaml(`type: coupler-io\ntoken: t\nworkspace_id: "9"\napi_host: http://evil.test\n`);
+			await expect(loadConnectionConfig(workDir)).rejects.toThrow(/api_host/);
+		});
+
+		it('rejects table names that are not simple identifiers', async () => {
+			await writeYaml(`type: coupler-io\ntoken: t\nworkspace_id: "9"\ndatasets:\n  "my table": abc\n`);
+			await expect(loadConnectionConfig(workDir)).rejects.toThrow(/datasets/);
+		});
+
+		describe('keyfile', () => {
+			async function writeKeyfile(body: unknown): Promise<void> {
+				await writeFile(path.join(workDir, 'coupler-io-api.json'), JSON.stringify(body));
+			}
+
+			it('reads the token and hosts from the key file', async () => {
+				await writeKeyfile({
+					token: 'from-file',
+					api_host: 'https://api.couplerstaging.dev',
+					query_host: 'https://services.couplerstaging.dev'
+				});
+				await writeYaml(`type: coupler-io\nkeyfile: ./coupler-io-api.json\nworkspace_id: "9"\n`);
+				expect(await loadConnectionConfig(workDir)).toMatchObject({
+					token: 'from-file',
+					apiHost: 'https://api.couplerstaging.dev',
+					queryHost: 'https://services.couplerstaging.dev'
+				});
+			});
+
+			it('lets connection.yaml hosts override the key file, and defaults to production', async () => {
+				await writeKeyfile({ token: 't', api_host: 'https://api.couplerstaging.dev' });
+				await writeYaml(
+					`type: coupler-io\nkeyfile: coupler-io-api.json\nworkspace_id: "9"\napi_host: https://api.example.test\n`
+				);
+				expect(await loadConnectionConfig(workDir)).toMatchObject({
+					apiHost: 'https://api.example.test',
+					queryHost: 'https://services.coupler.io'
+				});
+			});
+
+			it('rejects a key file without a token', async () => {
+				await writeKeyfile({ hostname: 'couplerstaging.dev' });
+				await writeYaml(`type: coupler-io\nkeyfile: coupler-io-api.json\nworkspace_id: "9"\n`);
+				await expect(loadConnectionConfig(workDir)).rejects.toThrow(/keyfile.*token/);
+			});
+
+			it('rejects both token and keyfile', async () => {
+				await writeYaml(`type: coupler-io\ntoken: t\nkeyfile: k.json\nworkspace_id: "9"\n`);
+				await expect(loadConnectionConfig(workDir)).rejects.toThrow(/only one of: token, keyfile/);
+			});
+
+			it('rejects neither token nor keyfile', async () => {
+				await writeYaml(`type: coupler-io\nworkspace_id: "9"\n`);
+				await expect(loadConnectionConfig(workDir)).rejects.toThrow(/one of: token, keyfile/);
+			});
+		});
+	});
+
 	it('rejects unknown type', async () => {
 		await writeYaml(`type: redshift\n`);
 		await expect(loadConnectionConfig(workDir)).rejects.toThrow(/unsupported type/);

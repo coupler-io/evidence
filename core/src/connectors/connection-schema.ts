@@ -35,6 +35,11 @@ import {
 	motherduckConnectionSchema,
 	type MotherDuckConnection
 } from './motherduck/connection-schema';
+import {
+	couplerIoBase,
+	couplerIoConnectionSchema,
+	type CouplerIoConnection
+} from './coupler-io/connection-schema';
 
 export type FieldCategory = 'credential' | 'context' | 'visibility' | 'rls';
 
@@ -125,7 +130,9 @@ export {
 	cubeBase,
 	cubeConnectionSchema,
 	motherduckBase,
-	motherduckConnectionSchema
+	motherduckConnectionSchema,
+	couplerIoBase,
+	couplerIoConnectionSchema
 };
 export type {
 	SnowflakeConnection,
@@ -135,7 +142,8 @@ export type {
 	DatabricksConnection,
 	PostgresConnection,
 	CubeConnection,
-	MotherDuckConnection
+	MotherDuckConnection,
+	CouplerIoConnection
 };
 
 export const CONNECTION_TYPES = [
@@ -146,7 +154,8 @@ export const CONNECTION_TYPES = [
 	'databricks',
 	'postgres',
 	'cube',
-	'motherduck'
+	'motherduck',
+	'coupler-io'
 ] as const;
 export type ConnectionType = (typeof CONNECTION_TYPES)[number];
 
@@ -158,7 +167,8 @@ export type Connection =
 	| DatabricksConnection
 	| PostgresConnection
 	| CubeConnection
-	| MotherDuckConnection;
+	| MotherDuckConnection
+	| CouplerIoConnection;
 
 const schemasByType = {
 	snowflake: snowflakeConnectionSchema,
@@ -168,7 +178,8 @@ const schemasByType = {
 	databricks: databricksConnectionSchema,
 	postgres: postgresConnectionSchema,
 	cube: cubeConnectionSchema,
-	motherduck: motherduckConnectionSchema
+	motherduck: motherduckConnectionSchema,
+	'coupler-io': couplerIoConnectionSchema
 } as const;
 
 export function getConnectionSchema(type: ConnectionType): z.ZodType {

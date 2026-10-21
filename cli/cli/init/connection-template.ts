@@ -20,7 +20,8 @@ export const INIT_WAREHOUSES = [
 	'databricks',
 	'postgres',
 	'cube',
-	'motherduck'
+	'motherduck',
+	'coupler-io'
 ] as const;
 
 export type InitWarehouse = (typeof INIT_WAREHOUSES)[number];
@@ -132,6 +133,19 @@ token: "<token>" # MotherDuck service/access token (MotherDuck UI: Settings -> A
 # schemas: ["<schema>"] # allowlist of schemas exposed to the schema browser, optional
 `;
 
+const COUPLER_IO_TEMPLATE = `# Coupler.io direct connector — queries Coupler.io datasets over the Public API (DuckDB SQL).
+type: coupler-io
+keyfile: ./coupler-io-api.json # {"token": "...", "api_host": "...", "query_host": "..."} — hosts optional; or inline token
+# token: "\${COUPLER_API_TOKEN}" # personal API token (Coupler.io profile -> API access); \${VAR} reads the environment
+workspace_id: "<workspace-id>" # GET /v1/workspaces lists them
+# Table name -> dataset id. Omit to expose every queryable dataset, named after the dataset.
+datasets:
+  <table_name>: "<dataset-id>"
+# Hosts default to the key file, then production. Staging:
+# api_host: https://api.couplerstaging.dev
+# query_host: https://services.couplerstaging.dev
+`;
+
 const TEMPLATES: Record<InitWarehouse, string> = {
 	snowflake: SNOWFLAKE_TEMPLATE,
 	bigquery: BIGQUERY_TEMPLATE,
@@ -140,7 +154,8 @@ const TEMPLATES: Record<InitWarehouse, string> = {
 	databricks: DATABRICKS_TEMPLATE,
 	postgres: POSTGRES_TEMPLATE,
 	cube: CUBE_TEMPLATE,
-	motherduck: MOTHERDUCK_TEMPLATE
+	motherduck: MOTHERDUCK_TEMPLATE,
+	'coupler-io': COUPLER_IO_TEMPLATE
 };
 
 /** Returns the connection.yaml scaffold for a supported warehouse type. */

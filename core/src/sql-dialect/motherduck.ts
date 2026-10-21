@@ -29,7 +29,7 @@ import {
  *  - `iff` is expanded to `CASE WHEN` (portable, no reliance on a scalar IF).
  */
 export class MotherDuckDialect implements SqlDialect {
-	readonly name = 'motherduck';
+	readonly name: string = 'motherduck';
 
 	dateGrain(grain: string, column: string, _firstDayOfWeek: 'sunday' | 'monday'): string {
 		// NOTE on week handling: DuckDB's `date_trunc('week', ...)` and the

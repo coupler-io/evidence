@@ -800,7 +800,8 @@
               "direct-connectors/databricks",
               "direct-connectors/postgres",
               "direct-connectors/cube",
-              "direct-connectors/motherduck"
+              "direct-connectors/motherduck",
+              "direct-connectors/coupler-io"
             ]
           },
           {

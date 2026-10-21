@@ -13,7 +13,8 @@ export const WAREHOUSE_MODES = [
 	'databricks',
 	'postgres',
 	'cube',
-	'motherduck'
+	'motherduck',
+	'coupler-io'
 ] as const;
 
 export type WarehouseMode = (typeof WAREHOUSE_MODES)[number];

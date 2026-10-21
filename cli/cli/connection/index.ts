@@ -11,6 +11,7 @@ import { executeFabricQuery } from './fabric';
 import { executeDatabricksQuery } from './databricks';
 import { executePostgresQuery } from './postgres';
 import { executeMotherduckQuery } from './motherduck';
+import { executeCouplerIoQuery, COUPLER_IO_TABLES_SQL } from './coupler-io';
 import { managedTableNamesSql } from '@evidence/core/metadata/managed-catalog';
 import type { ConnectionConfig, QueryResult } from './types';
 
@@ -36,6 +37,8 @@ export async function executeQuery(sql: string, config: ConnectionConfig): Promi
 			return executePostgresQuery(sql, config);
 		case 'motherduck':
 			return executeMotherduckQuery(sql, config);
+		case 'coupler-io':
+			return executeCouplerIoQuery(sql, config);
 		default:
 			// Belt-and-braces: a future ConnectionConfig variant added without a
 			// matching branch should fail loudly here rather than silently
@@ -143,6 +146,9 @@ export function listTablesSql(config: ConnectionConfig | null): string {
 			}
 			return `${base} WHERE table_schema NOT IN ('information_schema', 'pg_catalog') ORDER BY name`;
 		}
+		case 'coupler-io':
+			// Answered from the dataset catalog by the executor, not sent to /query.
+			return COUPLER_IO_TABLES_SQL;
 	}
 }
 

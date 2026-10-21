@@ -53,7 +53,9 @@ export async function runQuery(sql: string): Promise<RunQueryResult> {
 						? 'BigQuery'
 						: connectionConfig.type === 'fabric'
 							? 'Microsoft Fabric'
-							: undefined;
+							: connectionConfig.type === 'coupler-io'
+								? 'Coupler.io'
+								: undefined;
 			return { rows: result.rows, columns: result.columns, source };
 		} catch (e) {
 			return {

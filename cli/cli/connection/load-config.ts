@@ -21,6 +21,7 @@ import {
 	postgresConnectionSchema,
 	cubeConnectionSchema,
 	motherduckConnectionSchema,
+	couplerIoConnectionSchema,
 	snowflakeConnectionSchema
 } from '@evidence/core/connectors/connection-schema';
 import { resolveSnowflakeCredentials } from '@evidence/core/connectors/snowflake/resolve';
@@ -31,6 +32,7 @@ import { resolveDatabricksCredentials } from '@evidence/core/connectors/databric
 import { resolvePostgresCredentials } from '@evidence/core/connectors/postgres/resolve';
 import { resolveCubeCredentials } from '@evidence/core/connectors/cube/resolve';
 import { resolveMotherduckCredentials } from '@evidence/core/connectors/motherduck/resolve';
+import { resolveCouplerIoCredentials } from '@evidence/core/connectors/coupler-io/resolve';
 import type { ConnectionConfig } from './types';
 
 const CONFIG_FILENAME = 'connection.yaml';
@@ -165,6 +167,12 @@ export async function loadConnectionConfig(cwd: string): Promise<ConnectionConfi
 		const data = parseOrThrow(motherduckConnectionSchema, obj);
 		const credentials = await resolveMotherduckCredentials(data, { cwd });
 		return { type: 'motherduck', ...credentials };
+	}
+
+	if (obj.type === 'coupler-io') {
+		const data = parseOrThrow(couplerIoConnectionSchema, obj);
+		const credentials = await resolveCouplerIoCredentials(data, { cwd });
+		return { type: 'coupler-io', ...credentials };
 	}
 
 	throw new Error(

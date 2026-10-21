@@ -2,6 +2,9 @@ import type { WarehouseMode } from './warehouse-mode';
 
 /** The allowlist-bearing fields a connector config may carry (Studio settings or connection.yaml). */
 export interface SchemaAllowlistConfig {
+	// Shared by every connector config, so one without allowlist fields (Coupler.io)
+	// still matches this all-optional shape.
+	type?: string;
 	datasets?: string[];
 	databases?: string[];
 	schemas?: string[];

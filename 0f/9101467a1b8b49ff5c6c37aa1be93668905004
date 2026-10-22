@@ -1,0 +1,33 @@
+core/src/connectors/coupler-io/connection-schema.ts
+  s_fb9b7e07d46d4a::t_2f59288556ce87 8,90-103
+  s_fb9b7e07d46d4a::t_1c3929960943f6 104
+core/src/connectors/coupler-io/resolve.ts
+  s_fb9b7e07d46d4a::t_2f59288556ce87 54-55
+docs/direct-connectors/coupler-io.mdx
+  s_fb9b7e07d46d4a::t_2f59288556ce87 71-73,86
+core/src/connectors/coupler-io/credentials.ts
+  s_fb9b7e07d46d4a::t_2f59288556ce87 13-14
+cli/cli/init/connection-template.ts
+  s_fb9b7e07d46d4a::t_2f59288556ce87 144
+cli/cli/connection/coupler-io.ts
+  s_fb9b7e07d46d4a::t_2f59288556ce87 62,186-187
+cli/cli/connection/load-config.test.ts
+  s_fb9b7e07d46d4a::t_2f59288556ce87 238-239,243-247
+  s_fb9b7e07d46d4a::t_a511d60e5441f6 248-249
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "0f9101467a1b8b49ff5c6c37aa1be93668905004",
+  "prompts": {},
+  "sessions": {
+    "s_fb9b7e07d46d4a": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "812bb402-e1c6-4745-828f-fbcfb9d33728",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Olexander Paladiy <olexander.paladiy@railsware.com>"
+    }
+  }
+}

@@ -235,8 +235,16 @@ describe('loadConnectionConfig', () => {
 				workspaceId: '1042',
 				apiHost: 'https://api.coupler.io',
 				queryHost: 'https://services.coupler.io',
-				tables: { funnel: '1654ea41-37bf-48b2-8256-87c5ea3c5a90' }
+				tables: { funnel: '1654ea41-37bf-48b2-8256-87c5ea3c5a90' },
+				maxConcurrentRequests: 4
 			});
+		});
+
+		it('accepts max_concurrent_requests and rejects out-of-range values', async () => {
+			await writeYaml(`type: coupler-io\ntoken: t\nworkspace_id: "9"\nmax_concurrent_requests: 10\n`);
+			expect(await loadConnectionConfig(workDir)).toMatchObject({ maxConcurrentRequests: 10 });
+			await writeYaml(`type: coupler-io\ntoken: t\nworkspace_id: "9"\nmax_concurrent_requests: 0\n`);
+			await expect(loadConnectionConfig(workDir)).rejects.toThrow(/max_concurrent_requests/);
 		});
 
 		it('accepts host overrides and strips trailing slashes', async () => {

@@ -51,6 +51,7 @@ export async function resolveCouplerIoCredentials(
 		workspaceId: config.workspace_id,
 		apiHost: config.api_host ?? keyfile?.api_host ?? COUPLER_IO_DEFAULT_API_HOST,
 		queryHost: config.query_host ?? keyfile?.query_host ?? COUPLER_IO_DEFAULT_QUERY_HOST,
-		tables: config.datasets
+		tables: config.datasets,
+		maxConcurrentRequests: config.max_concurrent_requests
 	};
 }

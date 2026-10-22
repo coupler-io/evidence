@@ -10,4 +10,6 @@ export type CouplerIoCredentials = {
 	apiHost: string;
 	queryHost: string;
 	tables: Record<string, string>;
+	/** Requests in flight at once; the rest queue. */
+	maxConcurrentRequests: number;
 };

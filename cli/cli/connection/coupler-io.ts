@@ -34,7 +34,6 @@ import type { QueryResult } from './types';
 export { COUPLER_IO_TABLES_SQL, COUPLER_IO_COLUMNS_SQL };
 
 const CATALOG_TTL_MS = 5 * 60_000;
-const MAX_CONCURRENT_REQUESTS = 4;
 
 type CatalogEntry = { name: string; datasetId: string; rowsCount: number | null };
 
@@ -60,7 +59,7 @@ class CouplerIoClient {
 
 	async #request<T>(url: string, init: RequestInit = {}): Promise<T> {
 		// Small concurrency cap so a page's burst of queries doesn't trip the rate limit.
-		if (this.#active >= MAX_CONCURRENT_REQUESTS) {
+		if (this.#active >= this.config.maxConcurrentRequests) {
 			await new Promise<void>((resolve) => this.#waiting.push(resolve));
 		}
 		this.#active++;
@@ -184,7 +183,8 @@ function getClient(config: CouplerIoCredentials): CouplerIoClient {
 		config.queryHost,
 		config.workspaceId,
 		config.token,
-		config.tables
+		config.tables,
+		config.maxConcurrentRequests
 	]);
 	if (cachedClient?.key === key) return cachedClient.client;
 	cachedClient = { key, client: new CouplerIoClient(config) };

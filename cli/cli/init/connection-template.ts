@@ -141,6 +141,7 @@ workspace_id: "<workspace-id>" # GET /v1/workspaces lists them
 # Table name -> dataset id. Omit to expose every queryable dataset, named after the dataset.
 datasets:
   <table_name>: "<dataset-id>"
+# max_concurrent_requests: 4 # API requests in flight at once (the API allows 100/minute per organization)
 # Hosts default to the key file, then production. Staging:
 # api_host: https://api.couplerstaging.dev
 # query_host: https://services.couplerstaging.dev

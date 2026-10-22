@@ -68,6 +68,9 @@ Without a `datasets:` map, every queryable dataset in the workspace is exposed u
 <ResponseField name="datasets" type="map<string, string>">
   Table name → dataset id. Table names must be simple identifiers. When empty, every queryable dataset in the workspace is exposed. Default: `{}`.
 </ResponseField>
+<ResponseField name="max_concurrent_requests" type="integer">
+  How many API requests run at once (1–50); the rest wait in a queue. Default: `4`.
+</ResponseField>
 <ResponseField name="api_host" type="string">
   Public API origin. Default: the key file's `api_host`, then `"https://api.coupler.io"`. Staging: `https://api.couplerstaging.dev`.
 </ResponseField>
@@ -80,7 +83,7 @@ Without a `datasets:` map, every queryable dataset in the workspace is exposed u
 - **One dataset per query.** `POST /query` reads a single dataset, so a statement may reference at most one configured table (in any number of places). Join datasets inside a Coupler.io dataflow instead.
 - **Typed columns.** Snapshot values are stored as JSON text; the connector exposes each table as a view that decodes the values and casts them to the column types the API reports (`integer` → `BIGINT`, `number` → `DOUBLE`, `date` → `DATE`, `date-time` → `TIMESTAMP`, `boolean` → `BOOLEAN`, otherwise `VARCHAR`). Hidden columns are not exposed.
 - **Row cap.** A query returns at most 10,000 rows; larger results are truncated (with a warning in the CLI output). Aggregate or filter in SQL.
-- **Rate limit.** The API allows 100 requests per minute per organization. The connector caches the dataset catalog and column schemas for five minutes and runs at most four requests at a time.
+- **Rate limit.** The API allows 100 requests per minute per organization. The connector caches the dataset catalog, column schemas and query results for five minutes, and runs at most `max_concurrent_requests` (default four) requests at a time.
 - **Timeout.** Each query has 60 seconds.
 
 ## SQL dialect

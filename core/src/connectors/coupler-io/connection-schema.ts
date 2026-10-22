@@ -5,6 +5,7 @@ const meta = (m: ConnectionFieldMeta): ConnectionFieldMeta => m;
 
 export const COUPLER_IO_DEFAULT_API_HOST = 'https://api.coupler.io';
 export const COUPLER_IO_DEFAULT_QUERY_HOST = 'https://services.coupler.io';
+export const COUPLER_IO_DEFAULT_MAX_CONCURRENT_REQUESTS = 4;
 
 export const httpsUrl = z
 	.string()
@@ -85,6 +86,21 @@ export const couplerIoBase = z.object({
 			category: 'context'
 		})
 	),
+
+	max_concurrent_requests: z
+		.number()
+		.int()
+		.min(1)
+		.max(50)
+		.default(COUPLER_IO_DEFAULT_MAX_CONCURRENT_REQUESTS)
+		.meta(
+			meta({
+				label: 'Max concurrent requests',
+				description:
+					'How many Coupler.io API requests run at once; the rest wait in a queue. The API allows 100 requests per minute per organization.',
+				category: 'context'
+			})
+		),
 
 	datasets: z
 		.record(

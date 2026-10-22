@@ -30,6 +30,7 @@ cli/cli/connection/index.ts
   s_dcceb408454b97::t_d1951214f7abce 30
 cli/src/routes/+layout.server.ts
   s_dcceb408454b97::t_424ebc190fa1bc 13
+  s_dcceb408454b97::t_b5d4817a4fa0e6 82
 core/src/connectors/coupler-io/sql.test.ts
   s_dcceb408454b97::t_556a067c6b6734 12
   s_dcceb408454b97::t_941dcce6694c57 84-105,108-128,166-174,204-209
@@ -59,6 +60,8 @@ core/src/connectors/coupler-io/connection-schema.ts
 core/src/sql-dialect.test.ts
   s_dcceb408454b97::t_4bb4a72d62618d 11-13,1095-1116
   s_dcceb408454b97::t_f6ad2e3830c3b2 1117-1118
+cli/src/lib/server/run-query.ts
+  s_dcceb408454b97::t_b5d4817a4fa0e6 19-23,68
 ---
 {
   "schema_version": "authorship/3.0.0",

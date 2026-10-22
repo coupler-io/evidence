@@ -1,0 +1,78 @@
+cli/cli/connection/coupler-io.ts
+  s_dcceb408454b97::t_30304783d51204 241-244,246,251,332-334
+  s_dcceb408454b97::t_0a987c6f8f01cf 80
+  s_dcceb408454b97::t_c66ef6f88f28a7 321-331,335-338,340-341
+  s_dcceb408454b97::t_a552918a093afc 233,235-240,252-257,260,264-273
+  s_dcceb408454b97::t_dd31e6cbdeeaa9 78,83-88,92-128,130-166,171,173-175
+  s_dcceb408454b97::t_def5ac0611976b 40-53,56-65,274
+  s_dcceb408454b97::t_5f0e6ac8aecb61 285
+  s_dcceb408454b97::t_556a067c6b6734 17-19
+  s_dcceb408454b97::t_9632540f9f3679 66,275
+docs/direct-connectors/coupler-io.mdx
+  s_dcceb408454b97::t_b7d3b604787686 31,75,78
+  s_dcceb408454b97::t_5f0e6ac8aecb61 86
+cli/cli/connection/index.test.ts
+  s_dcceb408454b97::t_ee02ef34a01372 2,8,155-175
+  s_dcceb408454b97::t_4e01f95efb7daa 7
+  s_dcceb408454b97::t_202113bdbd145b 176
+cli/cli/connection/coupler-io.test.ts
+  s_dcceb408454b97::t_30304783d51204 42-44,162-168
+  s_dcceb408454b97::t_6c11818dd10f37 1-41,45-161,169-204
+cli/cli/connection/load-config.test.ts
+  s_dcceb408454b97::t_11194f7c6de3d6 256,259-260,298-299,304-305,310,312,315
+  s_dcceb408454b97::t_cbe7f555964c3f 272-280
+  s_dcceb408454b97::t_e96d33f7323824 320-325
+  s_dcceb408454b97::t_b7d3b604787686 327
+  s_dcceb408454b97::t_8a1df20b74c2e0 244-246,248-250,266-268,284-286,375-378
+  s_dcceb408454b97::t_0c4502491e0b04 281-282
+cli/cli/connection/index.ts
+  s_dcceb408454b97::t_424ebc190fa1bc 16,22-29
+  s_dcceb408454b97::t_d1951214f7abce 30
+cli/src/routes/+layout.server.ts
+  s_dcceb408454b97::t_424ebc190fa1bc 12,109
+core/src/connectors/coupler-io/sql.test.ts
+  s_dcceb408454b97::t_556a067c6b6734 12
+  s_dcceb408454b97::t_941dcce6694c57 84-105,108-128,166-174,204-209
+cli/src/routes/api/validate/+server.ts
+  s_dcceb408454b97::t_424ebc190fa1bc 29,243
+core/src/sql-dialect/motherduck.ts
+  s_dcceb408454b97::t_f834e7f43debe6 32
+core/src/connectors/coupler-io/catalog-sql.ts
+  s_dcceb408454b97::t_6223884a1d2146 1-16
+cli/cli/init/connection-template.ts
+  s_dcceb408454b97::t_b7d3b604787686 145-147
+core/src/metadata/Metadata.svelte.ts
+  s_dcceb408454b97::t_6223884a1d2146 13
+core/src/sql-dialect/coupler-io.ts
+  s_dcceb408454b97::t_f834e7f43debe6 2-5,12-13
+core/src/connectors/coupler-io/resolve.ts
+  s_dcceb408454b97::t_85835fcd49ecfe 7,20-21
+core/src/connectors/coupler-io/sql.ts
+  s_dcceb408454b97::t_941dcce6694c57 146,150-155,163-176,181-192,206,208-209,211,213-226
+  s_dcceb408454b97::t_2faafd7da580af 147-149,156-162,177-180,193-194,196-199
+core/src/connectors/coupler-io/connection-schema.ts
+  s_dcceb408454b97::t_bb398122cf347f 10,81,90
+  s_dcceb408454b97::t_cdd88465a315d9 11-13
+  s_dcceb408454b97::t_85835fcd49ecfe 77,86
+  s_dcceb408454b97::t_8a1df20b74c2e0 20
+  s_dcceb408454b97::t_b5cd4412ab613d 14-15,19
+core/src/sql-dialect.test.ts
+  s_dcceb408454b97::t_4bb4a72d62618d 11-13,1095-1116
+  s_dcceb408454b97::t_f6ad2e3830c3b2 1117-1118
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "40eeab6b5d0b1ff31b31b6e76008cafcddc88472",
+  "prompts": {},
+  "sessions": {
+    "s_dcceb408454b97": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "79504d4a-a364-46c1-832d-fd72e6fe8749",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Olexander Paladiy <olexander.paladiy@railsware.com>"
+    }
+  }
+}

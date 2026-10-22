@@ -4,7 +4,7 @@ import { z } from 'zod/v4';
 import {
 	COUPLER_IO_DEFAULT_API_HOST,
 	COUPLER_IO_DEFAULT_QUERY_HOST,
-	httpsUrl,
+	couplerIoOrigin,
 	type CouplerIoConnection
 } from './connection-schema';
 import type { CouplerIoCredentials } from './credentials';
@@ -17,8 +17,8 @@ export type ResolveOpts = {
 /** Shape of the `keyfile` JSON. Hosts are optional; connection.yaml values win. */
 const keyfileSchema = z.object({
 	token: z.string().min(1),
-	api_host: httpsUrl.optional(),
-	query_host: httpsUrl.optional()
+	api_host: couplerIoOrigin.optional(),
+	query_host: couplerIoOrigin.optional()
 });
 
 async function readKeyfile(file: string, cwd: string): Promise<z.infer<typeof keyfileSchema>> {

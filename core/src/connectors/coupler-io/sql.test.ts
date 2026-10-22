@@ -4,14 +4,12 @@ import {
 	couplerIoDuckType,
 	findTableRefs,
 	inferColumns,
-	isCouplerIoCatalogSql,
-	COUPLER_IO_COLUMNS_SQL,
-	COUPLER_IO_TABLES_SQL,
 	slugifyTableName,
 	typedViewSql,
 	viewColumnsFromApi,
 	withTableCte
 } from './sql';
+import { COUPLER_IO_COLUMNS_SQL, COUPLER_IO_TABLES_SQL, isCouplerIoCatalogSql } from './catalog-sql';
 
 describe('couplerIoDuckType', () => {
 	it('maps API column schemas to DuckDB types', () => {
@@ -83,8 +81,51 @@ describe('findTableRefs', () => {
 		expect(findTableRefs('select * from funnel(1)', tables)).toEqual([]);
 	});
 
+	it('finds tables in a comma-separated FROM list', () => {
+		expect(findTableRefs('select * from calendar c, funnel f where c.d = f.d', tables)).toEqual([
+			'funnel'
+		]);
+		expect(findTableRefs('select * from funnel, "revenue"', tables)).toEqual(['funnel', 'Revenue']);
+		expect(findTableRefs('select * from a join b on a.x = b.x, funnel', tables)).toEqual([
+			'funnel'
+		]);
+		expect(
+			findTableRefs('select * from (select a, b from x), funnel where y in (1, 2)', tables)
+		).toEqual(['funnel']);
+	});
+
+	it('ignores commas outside a FROM list', () => {
+		expect(findTableRefs('select a, funnel from t', tables)).toEqual([]);
+		expect(findTableRefs('select * from t where x in (a, funnel)', tables)).toEqual([]);
+		expect(findTableRefs('select * from t group by a, funnel', tables)).toEqual([]);
+		expect(findTableRefs('select * from t order by a, funnel', tables)).toEqual([]);
+		expect(findTableRefs('select * from t join u using (a, funnel)', tables)).toEqual([]);
+		expect(findTableRefs('select coalesce(a, funnel) from t', tables)).toEqual([]);
+	});
+
 	it('ignores names the statement defines as its own CTE', () => {
 		expect(findTableRefs('with funnel as (select 1) select * from funnel', tables)).toEqual([]);
+		expect(
+			findTableRefs('with a as (select 1), funnel as (select 2) select * from funnel', tables)
+		).toEqual([]);
+		expect(
+			findTableRefs('with funnel as materialized (select 1) select * from funnel', tables)
+		).toEqual([]);
+		expect(
+			findTableRefs('with funnel as not materialized (select 1) select * from funnel', tables)
+		).toEqual([]);
+		expect(
+			findTableRefs('with funnel(a, b) as (select 1, 2) select * from funnel', tables)
+		).toEqual([]);
+		expect(
+			findTableRefs('with recursive "funnel" as (select 1) select * from funnel', tables)
+		).toEqual([]);
+	});
+
+	it('does not mistake casts or aliases for CTE definitions', () => {
+		expect(findTableRefs('select cast(x as varchar) as funnel from funnel', tables)).toEqual([
+			'funnel'
+		]);
 	});
 });
 
@@ -122,7 +163,15 @@ describe('withTableCte', () => {
 describe('inferColumns', () => {
 	it('types columns from the first non-null value', () => {
 		const cols = inferColumns([
-			{ a: null, b: 'x', c: '2025-01-01T00:00:00.000Z', d: true, e: [1], f: null, g: 31 },
+			{
+				a: null,
+				b: 'x',
+				c: '2025-01-01T00:00:00.000Z',
+				d: true,
+				e: [1],
+				f: null,
+				g: 31
+			},
 			{ a: 1.5, b: 'y', c: null, d: false, e: null, f: null, g: 30 }
 		]);
 		expect(cols.map((c) => [c.name, c.jsType])).toEqual([
@@ -152,7 +201,12 @@ describe('columnsFromDescribe', () => {
 			])
 		).toEqual([
 			{ name: 'm', clickhouseType: 'DATE', jsType: 'date', nullable: true },
-			{ name: 'n', clickhouseType: 'BIGINT', jsType: 'number', nullable: false }
+			{
+				name: 'n',
+				clickhouseType: 'BIGINT',
+				jsType: 'number',
+				nullable: false
+			}
 		]);
 	});
 });

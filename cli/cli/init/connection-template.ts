@@ -142,9 +142,9 @@ workspace_id: "<workspace-id>" # GET /v1/workspaces lists them
 datasets:
   <table_name>: "<dataset-id>"
 # max_concurrent_requests: 4 # API requests in flight at once (the API allows 100/minute per organization)
-# Hosts default to the key file, then production. Staging:
-# api_host: https://api.couplerstaging.dev
-# query_host: https://services.couplerstaging.dev
+# Hosts (*.coupler.io only) default to the key file, then production:
+# api_host: https://api.coupler.io
+# query_host: https://services.coupler.io
 `;
 
 const TEMPLATES: Record<InitWarehouse, string> = {

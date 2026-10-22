@@ -7,12 +7,17 @@ export const COUPLER_IO_DEFAULT_API_HOST = 'https://api.coupler.io';
 export const COUPLER_IO_DEFAULT_QUERY_HOST = 'https://services.coupler.io';
 export const COUPLER_IO_DEFAULT_MAX_CONCURRENT_REQUESTS = 4;
 
-export const httpsUrl = z
+// The API token is sent to these hosts, so only Coupler.io's own domain is
+// allowed — blocks sending it to an arbitrary host via a crafted
+// connection.yaml or key file.
+const COUPLER_IO_ORIGIN_RE = /^https:\/\/([a-z0-9-]+\.)*coupler\.io$/i;
+
+export const couplerIoOrigin = z
 	.string()
 	.min(1)
 	.transform((s) => s.trim().replace(/\/+$/, ''))
-	.refine((s) => /^https:\/\/[^/\s]+$/i.test(s), {
-		message: 'should be an https:// origin with no path, e.g. https://api.coupler.io'
+	.refine((s) => COUPLER_IO_ORIGIN_RE.test(s), {
+		message: 'should be an https:// origin on coupler.io with no path, e.g. https://api.coupler.io'
 	});
 
 /**
@@ -69,20 +74,20 @@ export const couplerIoBase = z.object({
 
 	// No zod defaults on the hosts: a key file may set them, so resolve.ts applies
 	// connection.yaml → key file → production default.
-	api_host: httpsUrl.optional().meta(
+	api_host: couplerIoOrigin.optional().meta(
 		meta({
 			label: 'API host',
 			description:
-				'Coupler.io Public API origin. Defaults to the key file value, then production; use https://api.couplerstaging.dev for staging.',
+				'Coupler.io Public API origin. Defaults to the key file value, then https://api.coupler.io.',
 			category: 'context'
 		})
 	),
 
-	query_host: httpsUrl.optional().meta(
+	query_host: couplerIoOrigin.optional().meta(
 		meta({
 			label: 'Query host',
 			description:
-				'Origin serving POST /query. Defaults to the key file value, then production; use https://services.couplerstaging.dev for staging.',
+				'Origin serving POST /query. Defaults to the key file value, then https://services.coupler.io.',
 			category: 'context'
 		})
 	),

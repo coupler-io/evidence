@@ -13,10 +13,20 @@ import { executePostgresQuery } from './postgres';
 import { executeMotherduckQuery } from './motherduck';
 import { executeCouplerIoQuery, COUPLER_IO_TABLES_SQL } from './coupler-io';
 import { managedTableNamesSql } from '@evidence/core/metadata/managed-catalog';
+import { schemaAllowlist } from '@evidence/core/connectors/schema-allowlist';
 import type { ConnectionConfig, QueryResult } from './types';
 
 export type { ConnectionConfig, QueryResult, QueryColumn } from './types';
 export { loadConnectionConfig };
+
+/**
+ * Schema-browser allowlist for a connection.yaml config. Coupler.io has no schemas
+ * to scope (its catalog is the dataset list), so it never reaches the shared helper.
+ */
+export function connectionSchemaAllowlist(config: ConnectionConfig | null): string[] {
+	if (!config || config.type === 'coupler-io') return [];
+	return schemaAllowlist(config.type, config);
+}
 
 export async function executeQuery(sql: string, config: ConnectionConfig): Promise<QueryResult> {
 	switch (config.type) {

@@ -10,10 +10,9 @@ import { loadCredentials } from '$lib/auth/credentials.server';
 import { getProjectCwd } from '$lib/server/project-cwd';
 import { isServeMode } from '$lib/server/serve-mode';
 import { connectionYamlHint, resolveConnection } from '$lib/server/run-query';
-import { loadConnectionConfig } from '$cli/connection';
+import { connectionSchemaAllowlist, loadConnectionConfig } from '$cli/connection';
 import { loadProjectConfig } from '$cli/project-config/load-config';
 import { resolveProjectTheme } from '$lib/server/theme.server';
-import { schemaAllowlist } from '@evidence/core/connectors/schema-allowlist';
 import { selectLanguage } from '@evidence/core/translations/resolve-translations';
 import { SIDEBAR_WIDTH_COOKIE_NAME } from '@evidence/core/shadcn/components/ui/sidebar/constants.js';
 import { getTranslationLanguages } from '$lib/server/translations.server';
@@ -80,7 +79,7 @@ export const load: LayoutServerLoad = async ({ url, cookies }) => {
 		isServe || connectionError
 			? {
 					connectionType: connectionConfig?.type ?? null,
-					schemaAllowlist: schemaAllowlist(connectionConfig?.type ?? 'managed', connectionConfig)
+					schemaAllowlist: connectionSchemaAllowlist(connectionConfig ?? null)
 				}
 			: await resolveConnection(connectionConfig);
 	// Streamed so the Studio lookup never delays rendering for connection.yaml users.

@@ -26,17 +26,6 @@ export type CouplerIoApiColumn = {
 
 export type CouplerIoViewColumn = { name: string; duckType: string };
 
-/** Sentinel catalog statements, answered by the executor without calling /query. */
-export const COUPLER_IO_TABLES_SQL = 'SELECT name, rows FROM coupler_io_catalog.tables';
-export const COUPLER_IO_COLUMNS_SQL =
-	'SELECT "tableName", "columnName", "columnType" FROM coupler_io_catalog.columns';
-
-export function isCouplerIoCatalogSql(sql: string): 'tables' | 'columns' | null {
-	if (sql.includes('coupler_io_catalog.tables')) return 'tables';
-	if (sql.includes('coupler_io_catalog.columns')) return 'columns';
-	return null;
-}
-
 /** Public API column schema (JSON-schema-ish type/format) → DuckDB type. */
 export function couplerIoDuckType(schema: CouplerIoApiColumn['schema']): string {
 	const type = schema?.type?.toLowerCase();
@@ -154,34 +143,87 @@ function tokenize(sql: string): Token[] {
 const isKeyword = (t: Token | undefined, kw: string) =>
 	t?.kind === 'word' && t.value.toUpperCase() === kw;
 
+const isPunct = (t: Token | undefined, p: string) => t?.kind === 'punct' && t.value === p;
+
+/** Index just past the parenthesis group opening at `open`. */
+function skipParens(tokens: Token[], open: number): number {
+	let depth = 0;
+	for (let i = open; i < tokens.length; i++) {
+		if (isPunct(tokens[i], '(')) depth++;
+		else if (isPunct(tokens[i], ')') && --depth === 0) return i + 1;
+	}
+	return tokens.length;
+}
+
 /**
- * Configured table names the statement reads: an identifier right after FROM or
- * JOIN that isn't schema-qualified (`x.funnel`), a schema (`funnel.x`), or a
- * table function (`funnel(...)`). Names the statement defines itself as a CTE
- * (`funnel AS (`) are excluded. Returns the canonical (configured) names.
+ * Names the statement defines as CTEs: `name [(cols)] AS [NOT] [MATERIALIZED] (`
+ * right after WITH, RECURSIVE, or a comma.
+ */
+function ownCteNames(tokens: Token[]): Set<string> {
+	const names = new Set<string>();
+	for (let i = 1; i < tokens.length; i++) {
+		const t = tokens[i];
+		if (t.kind !== 'word' && t.kind !== 'quoted') continue;
+		const prev = tokens[i - 1];
+		if (!isKeyword(prev, 'WITH') && !isKeyword(prev, 'RECURSIVE') && !isPunct(prev, ',')) continue;
+		let j = i + 1;
+		if (isPunct(tokens[j], '(')) j = skipParens(tokens, j);
+		if (!isKeyword(tokens[j++], 'AS')) continue;
+		if (isKeyword(tokens[j], 'NOT')) j++;
+		if (isKeyword(tokens[j], 'MATERIALIZED')) j++;
+		if (isPunct(tokens[j], '(')) names.add(t.value.toLowerCase());
+	}
+	return names;
+}
+
+// Keywords that end a FROM clause's comma-separated table list.
+const FROM_CLAUSE_END = new Set([
+	'WHERE',
+	'GROUP',
+	'HAVING',
+	'QUALIFY',
+	'WINDOW',
+	'ORDER',
+	'LIMIT',
+	'OFFSET',
+	'UNION',
+	'INTERSECT',
+	'EXCEPT',
+	'SELECT'
+]);
+
+/**
+ * Configured table names the statement reads: an identifier right after FROM,
+ * JOIN, or a comma in a FROM list that isn't schema-qualified (`x.funnel`), a
+ * schema (`funnel.x`), or a table function (`funnel(...)`). Names the statement
+ * defines itself as a CTE are excluded. Returns the canonical (configured) names.
  */
 export function findTableRefs(sql: string, tableNames: Iterable<string>): string[] {
 	const byLower = new Map<string, string>();
 	for (const name of tableNames) byLower.set(name.toLowerCase(), name);
 
 	const tokens = tokenize(sql);
-	const ownCtes = new Set<string>();
-	for (let i = 0; i + 2 < tokens.length; i++) {
-		const t = tokens[i];
-		if (
-			(t.kind === 'word' || t.kind === 'quoted') &&
-			isKeyword(tokens[i + 1], 'AS') &&
-			tokens[i + 2].value === '('
-		) {
-			ownCtes.add(t.value.toLowerCase());
-		}
-	}
+	const ownCtes = ownCteNames(tokens);
 
+	// inFromList[depth]: a comma at this parenthesis depth separates FROM items.
+	const inFromList: boolean[] = [false];
 	const found = new Set<string>();
-	for (let i = 1; i < tokens.length; i++) {
+	for (let i = 0; i < tokens.length; i++) {
 		const t = tokens[i];
-		if (t.kind !== 'word' && t.kind !== 'quoted') continue;
-		if (!isKeyword(tokens[i - 1], 'FROM') && !isKeyword(tokens[i - 1], 'JOIN')) continue;
+		const depth = inFromList.length - 1;
+		if (isPunct(t, '(')) inFromList.push(false);
+		else if (isPunct(t, ')')) {
+			if (depth > 0) inFromList.pop();
+		} else if (isPunct(t, ';')) inFromList[depth] = false;
+		else if (isKeyword(t, 'FROM')) inFromList[depth] = true;
+		else if (t.kind === 'word' && FROM_CLAUSE_END.has(t.value.toUpperCase())) {
+			inFromList[depth] = false;
+		}
+
+		if (i === 0 || (t.kind !== 'word' && t.kind !== 'quoted')) continue;
+		const prev = tokens[i - 1];
+		const afterFromListComma = isPunct(prev, ',') && inFromList[depth];
+		if (!isKeyword(prev, 'FROM') && !isKeyword(prev, 'JOIN') && !afterFromListComma) continue;
 		const next = tokens[i + 1];
 		if (next?.value === '.' || next?.value === '(') continue;
 		const key = t.value.toLowerCase();

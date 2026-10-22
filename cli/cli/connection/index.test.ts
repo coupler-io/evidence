@@ -1,10 +1,11 @@
 import { describe, it, expect } from 'vitest';
-import { listTablesSql, qualifyTableName } from './index';
+import { connectionSchemaAllowlist, listTablesSql, qualifyTableName } from './index';
 import type {
 	BigQueryConnectionConfig,
 	ClickHouseConnectionConfig,
 	FabricConnectionConfig,
-	DatabricksConnectionConfig
+	DatabricksConnectionConfig,
+	CouplerIoConnectionConfig
 } from './types';
 
 const bq = (extra: Partial<BigQueryConnectionConfig> = {}): BigQueryConnectionConfig => ({
@@ -149,5 +150,27 @@ describe('qualifyTableName (databricks)', () => {
 
 	it('leaves an already-qualified name unchanged', () => {
 		expect(qualifyTableName('sales.orders', databricks({ schema: 'sales' }))).toBe('sales.orders');
+	});
+});
+
+describe('connectionSchemaAllowlist', () => {
+	const coupler: CouplerIoConnectionConfig = {
+		type: 'coupler-io',
+		token: 't',
+		workspaceId: '9',
+		apiHost: 'https://api.coupler.io',
+		queryHost: 'https://services.coupler.io',
+		tables: { funnel: 'ds' },
+		maxConcurrentRequests: 4
+	};
+
+	it('delegates to the shared allowlist for schema-scoped warehouses', () => {
+		expect(connectionSchemaAllowlist(bq({ datasets: ['a', 'b'] }))).toEqual(['a', 'b']);
+		expect(connectionSchemaAllowlist(ch(['analytics']))).toEqual(['analytics']);
+	});
+
+	it('returns no allowlist for Coupler.io or no connection', () => {
+		expect(connectionSchemaAllowlist(coupler)).toEqual([]);
+		expect(connectionSchemaAllowlist(null)).toEqual([]);
 	});
 });

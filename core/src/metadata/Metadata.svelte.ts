@@ -10,7 +10,7 @@ import { getFabricToJsType } from '../connectors/fabric/type-mapping';
 import { getDatabricksToJsType } from '../connectors/databricks/type-mapping';
 import { getPostgresToJsType } from '../connectors/postgres/type-mapping';
 import { getMotherduckToJsType } from '../connectors/motherduck/type-mapping';
-import { COUPLER_IO_COLUMNS_SQL } from '../connectors/coupler-io/sql';
+import { COUPLER_IO_COLUMNS_SQL } from '../connectors/coupler-io/catalog-sql';
 import { TableMetadata } from './TableMetadata.svelte';
 import { groupColumnsByTable } from './group-columns';
 import {

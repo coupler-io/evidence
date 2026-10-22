@@ -241,30 +241,49 @@ describe('loadConnectionConfig', () => {
 		});
 
 		it('accepts max_concurrent_requests and rejects out-of-range values', async () => {
-			await writeYaml(`type: coupler-io\ntoken: t\nworkspace_id: "9"\nmax_concurrent_requests: 10\n`);
+			await writeYaml(
+				`type: coupler-io\ntoken: t\nworkspace_id: "9"\nmax_concurrent_requests: 10\n`
+			);
 			expect(await loadConnectionConfig(workDir)).toMatchObject({ maxConcurrentRequests: 10 });
-			await writeYaml(`type: coupler-io\ntoken: t\nworkspace_id: "9"\nmax_concurrent_requests: 0\n`);
+			await writeYaml(
+				`type: coupler-io\ntoken: t\nworkspace_id: "9"\nmax_concurrent_requests: 0\n`
+			);
 			await expect(loadConnectionConfig(workDir)).rejects.toThrow(/max_concurrent_requests/);
 		});
 
 		it('accepts host overrides and strips trailing slashes', async () => {
 			await writeYaml(
-				`type: coupler-io\ntoken: t\nworkspace_id: "9"\napi_host: https://api.couplerstaging.dev/\nquery_host: https://services.couplerstaging.dev\n`
+				`type: coupler-io\ntoken: t\nworkspace_id: "9"\napi_host: https://api.eu.coupler.io/\nquery_host: https://services.eu.coupler.io\n`
 			);
 			expect(await loadConnectionConfig(workDir)).toMatchObject({
-				apiHost: 'https://api.couplerstaging.dev',
-				queryHost: 'https://services.couplerstaging.dev',
+				apiHost: 'https://api.eu.coupler.io',
+				queryHost: 'https://services.eu.coupler.io',
 				tables: {}
 			});
 		});
 
 		it('rejects a non-https host', async () => {
-			await writeYaml(`type: coupler-io\ntoken: t\nworkspace_id: "9"\napi_host: http://evil.test\n`);
+			await writeYaml(
+				`type: coupler-io\ntoken: t\nworkspace_id: "9"\napi_host: http://api.coupler.io\n`
+			);
 			await expect(loadConnectionConfig(workDir)).rejects.toThrow(/api_host/);
 		});
 
+		it.each([
+			'https://evil.test',
+			'https://coupler.io.evil.test',
+			'https://evilcoupler.io',
+			'https://api.coupler.io/v1',
+			'https://api.coupler.io:8443'
+		])('rejects a host outside Coupler.io: %s', async (host) => {
+			await writeYaml(`type: coupler-io\ntoken: t\nworkspace_id: "9"\nquery_host: ${host}\n`);
+			await expect(loadConnectionConfig(workDir)).rejects.toThrow(/query_host/);
+		});
+
 		it('rejects table names that are not simple identifiers', async () => {
-			await writeYaml(`type: coupler-io\ntoken: t\nworkspace_id: "9"\ndatasets:\n  "my table": abc\n`);
+			await writeYaml(
+				`type: coupler-io\ntoken: t\nworkspace_id: "9"\ndatasets:\n  "my table": abc\n`
+			);
 			await expect(loadConnectionConfig(workDir)).rejects.toThrow(/datasets/);
 		});
 
@@ -276,30 +295,36 @@ describe('loadConnectionConfig', () => {
 			it('reads the token and hosts from the key file', async () => {
 				await writeKeyfile({
 					token: 'from-file',
-					api_host: 'https://api.couplerstaging.dev',
-					query_host: 'https://services.couplerstaging.dev'
+					api_host: 'https://api.eu.coupler.io',
+					query_host: 'https://services.eu.coupler.io'
 				});
 				await writeYaml(`type: coupler-io\nkeyfile: ./coupler-io-api.json\nworkspace_id: "9"\n`);
 				expect(await loadConnectionConfig(workDir)).toMatchObject({
 					token: 'from-file',
-					apiHost: 'https://api.couplerstaging.dev',
-					queryHost: 'https://services.couplerstaging.dev'
+					apiHost: 'https://api.eu.coupler.io',
+					queryHost: 'https://services.eu.coupler.io'
 				});
 			});
 
 			it('lets connection.yaml hosts override the key file, and defaults to production', async () => {
-				await writeKeyfile({ token: 't', api_host: 'https://api.couplerstaging.dev' });
+				await writeKeyfile({ token: 't', api_host: 'https://api.eu.coupler.io' });
 				await writeYaml(
-					`type: coupler-io\nkeyfile: coupler-io-api.json\nworkspace_id: "9"\napi_host: https://api.example.test\n`
+					`type: coupler-io\nkeyfile: coupler-io-api.json\nworkspace_id: "9"\napi_host: https://api.us.coupler.io\n`
 				);
 				expect(await loadConnectionConfig(workDir)).toMatchObject({
-					apiHost: 'https://api.example.test',
+					apiHost: 'https://api.us.coupler.io',
 					queryHost: 'https://services.coupler.io'
 				});
 			});
 
+			it('rejects a key file host outside Coupler.io', async () => {
+				await writeKeyfile({ token: 't', query_host: 'https://evil.test' });
+				await writeYaml(`type: coupler-io\nkeyfile: coupler-io-api.json\nworkspace_id: "9"\n`);
+				await expect(loadConnectionConfig(workDir)).rejects.toThrow(/keyfile.*query_host/);
+			});
+
 			it('rejects a key file without a token', async () => {
-				await writeKeyfile({ hostname: 'couplerstaging.dev' });
+				await writeKeyfile({ hostname: 'coupler.io' });
 				await writeYaml(`type: coupler-io\nkeyfile: coupler-io-api.json\nworkspace_id: "9"\n`);
 				await expect(loadConnectionConfig(workDir)).rejects.toThrow(/keyfile.*token/);
 			});
@@ -347,7 +372,10 @@ describe('loadConnectionConfig', () => {
 				`type: clickhouse\nhost: local$host\nport: 8123\nuser: default\npassword: $not_interp\ndatabase: default\n`
 			);
 			const cfg = await loadConnectionConfig(workDir);
-			expect(cfg).toMatchObject({ url: expect.stringContaining('local$host'), password: '$not_interp' });
+			expect(cfg).toMatchObject({
+				url: expect.stringContaining('local$host'),
+				password: '$not_interp'
+			});
 		});
 
 		it('preserves secrets containing YAML-significant text verbatim', async () => {

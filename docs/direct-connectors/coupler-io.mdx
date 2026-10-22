@@ -28,7 +28,7 @@ Open the **API access** section of your [Coupler.io profile](https://app.coupler
 }
 ```
 
-`api_host` and `query_host` are optional (production by default) — set them in the key file when the token belongs to another environment, such as staging.
+`api_host` and `query_host` are optional (production by default) and must be `https://` origins on `coupler.io`.
 
 ### 2. Find the workspace and dataset ids
 
@@ -72,10 +72,10 @@ Without a `datasets:` map, every queryable dataset in the workspace is exposed u
   How many API requests run at once (1–50); the rest wait in a queue. Default: `4`.
 </ResponseField>
 <ResponseField name="api_host" type="string">
-  Public API origin. Default: the key file's `api_host`, then `"https://api.coupler.io"`. Staging: `https://api.couplerstaging.dev`.
+  Public API origin. Default: the key file's `api_host`, then `"https://api.coupler.io"`.
 </ResponseField>
 <ResponseField name="query_host" type="string">
-  Origin serving `POST /query`. Default: the key file's `query_host`, then `"https://services.coupler.io"`. Staging: `https://services.couplerstaging.dev`.
+  Origin serving `POST /query`. Default: the key file's `query_host`, then `"https://services.coupler.io"`.
 </ResponseField>
 
 ## How queries run
@@ -83,7 +83,7 @@ Without a `datasets:` map, every queryable dataset in the workspace is exposed u
 - **One dataset per query.** `POST /query` reads a single dataset, so a statement may reference at most one configured table (in any number of places). Join datasets inside a Coupler.io dataflow instead.
 - **Typed columns.** Snapshot values are stored as JSON text; the connector exposes each table as a view that decodes the values and casts them to the column types the API reports (`integer` → `BIGINT`, `number` → `DOUBLE`, `date` → `DATE`, `date-time` → `TIMESTAMP`, `boolean` → `BOOLEAN`, otherwise `VARCHAR`). Hidden columns are not exposed.
 - **Row cap.** A query returns at most 10,000 rows; larger results are truncated (with a warning in the CLI output). Aggregate or filter in SQL.
-- **Rate limit.** The API allows 100 requests per minute per organization. The connector caches the dataset catalog, column schemas and query results for five minutes, and runs at most `max_concurrent_requests` (default four) requests at a time.
+- **Rate limit.** The API allows 100 requests per minute per organization. The connector caches the dataset catalog, column schemas and query results for five minutes, runs at most `max_concurrent_requests` (default four) requests at a time, and starts at most 90 requests a minute so other clients keep some headroom. On a 429 response it pauses all requests (honoring `Retry-After`) and retries up to three times. Schema-browser lookups (one per dataset) queue behind page queries.
 - **Timeout.** Each query has 60 seconds.
 
 ## SQL dialect

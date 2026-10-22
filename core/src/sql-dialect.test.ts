@@ -8,7 +8,9 @@ import {
 	PostgresDialect,
 	CubeDialect,
 	MotherDuckDialect,
-	defaultDialect
+	CouplerIoDialect,
+	defaultDialect,
+	dialectFor
 } from './sql-dialect';
 import type { SqlDialect } from './sql-dialect';
 
@@ -1087,6 +1089,30 @@ describe('quoteIdentifierIfNeeded', () => {
 		it('quotes identifiers with spaces', () => {
 			expect(dialect.quoteIdentifierIfNeeded('Total Sales')).toBe('"Total Sales"');
 		});
+	});
+});
+
+describe('CouplerIoDialect', () => {
+	const dialect = new CouplerIoDialect();
+	const duckdb = new MotherDuckDialect();
+
+	it('has name "coupler-io" and is what dialectFor returns', () => {
+		expect(dialect.name).toBe('coupler-io');
+		expect(dialectFor('coupler-io')).toBeInstanceOf(CouplerIoDialect);
+	});
+
+	it('leaves the MotherDuck dialect name unchanged', () => {
+		expect(duckdb.name).toBe('motherduck');
+		const name: 'motherduck' = duckdb.name;
+		expect(name).toBe('motherduck');
+	});
+
+	it('generates the same DuckDB SQL as MotherDuck', () => {
+		expect(dialect.dateGrain('month', 'd', 'monday')).toBe(duckdb.dateGrain('month', 'd', 'monday'));
+		expect(dialect.dateAdd('day', 3, 'd')).toBe(duckdb.dateAdd('day', 3, 'd'));
+		expect(dialect.quoteIdentifierIfNeeded('Total Sales')).toBe(
+			duckdb.quoteIdentifierIfNeeded('Total Sales')
+		);
 	});
 });
 

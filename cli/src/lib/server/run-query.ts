@@ -16,8 +16,11 @@ import {
 	ensureSessionResolved,
 	clearSessionCache
 } from '$lib/auth/credentials.server';
-import { loadConnectionConfig, executeQuery as executeDirectQuery } from '$cli/connection';
-import { schemaAllowlist } from '@evidence/core/connectors/schema-allowlist';
+import {
+	connectionSchemaAllowlist,
+	loadConnectionConfig,
+	executeQuery as executeDirectQuery
+} from '$cli/connection';
 import { getProjectCwd } from '$lib/server/project-cwd';
 import {
 	queryNative,
@@ -62,7 +65,7 @@ export async function resolveConnection(
 	if (connectionConfig) {
 		return {
 			connectionType: connectionConfig.type,
-			schemaAllowlist: schemaAllowlist(connectionConfig.type, connectionConfig)
+			schemaAllowlist: connectionSchemaAllowlist(connectionConfig)
 		};
 	}
 	const org = await storedLoginWarehouse();

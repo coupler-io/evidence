@@ -26,8 +26,7 @@ import { process as processMarkdown } from '$lib/markdown';
 import { getProjectCwd } from '$lib/server/project-cwd';
 import { loadTranslations } from '$lib/server/translations.server';
 import { resolveProjectSettings } from '$lib/server/project-settings.server';
-import { loadConnectionConfig } from '$cli/connection';
-import { schemaAllowlist } from '@evidence/core/connectors/schema-allowlist';
+import { connectionSchemaAllowlist, loadConnectionConfig } from '$cli/connection';
 import { loadProjectConfig } from '$cli/project-config/load-config';
 import { loadCredentials } from '$lib/auth/credentials.server';
 import { ServerQueryService, type ConnectionType } from '$lib/server/ServerQueryService';
@@ -242,7 +241,7 @@ async function loadMetadata(cwd: string): Promise<{
 	try {
 		const config = await loadConnectionConfig(cwd);
 		if (config) connectionType = config.type;
-		if (config) allowlist = schemaAllowlist(config.type, config);
+		allowlist = connectionSchemaAllowlist(config);
 	} catch (e) {
 		return {
 			metadata: undefined,

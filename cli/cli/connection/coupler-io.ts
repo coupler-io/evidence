@@ -14,10 +14,12 @@
 import {
 	COUPLER_IO_COLUMNS_SQL,
 	COUPLER_IO_TABLES_SQL,
+	isCouplerIoCatalogSql
+} from '@evidence/core/connectors/coupler-io/catalog-sql';
+import {
 	columnsFromDescribe,
 	findTableRefs,
 	inferColumns,
-	isCouplerIoCatalogSql,
 	slugifyTableName,
 	typedViewSql,
 	viewColumnsFromApi,
@@ -35,7 +37,32 @@ export { COUPLER_IO_TABLES_SQL, COUPLER_IO_COLUMNS_SQL };
 
 const CATALOG_TTL_MS = 5 * 60_000;
 
+// The API allows 100 requests/minute per organization; keep headroom for other
+// clients (the app, MCP) sharing that allowance.
+const RATE_LIMIT_WINDOW_MS = 60_000;
+const RATE_LIMIT_REQUESTS = 90;
+// 429 retries: Retry-After when the API sends it, else 15s, 30s, 60s.
+const MAX_RETRIES = 3;
+const RETRY_BASE_MS = 15_000;
+
+/**
+ * `high` for queries a page is waiting on; `low` for schema-browser backfill,
+ * which can fan out to one request per dataset and shouldn't delay queries.
+ */
+type Priority = 'high' | 'low';
+
 type CatalogEntry = { name: string; datasetId: string; rowsCount: number | null };
+
+class CouplerIoApiError extends Error {
+	constructor(
+		readonly status: number,
+		message: string
+	) {
+		super(message);
+	}
+}
+
+class DatasetNotQueryableError extends Error {}
 
 type DatasetResponse = {
 	id: string;
@@ -48,42 +75,104 @@ type DatasetResponse = {
 
 type Cached<T> = { at: number; value: Promise<T> };
 
-class CouplerIoClient {
+export class CouplerIoClient {
 	#catalog: Cached<Map<string, CatalogEntry>> | null = null;
-	#views = new Map<string, Cached<CouplerIoViewColumn[]>>();
+	#views = new Map<string, CachedView>();
 	#results = new Map<string, Cached<QueryResult>>();
 	#active = 0;
-	#waiting: (() => void)[] = [];
+	#queues: Record<Priority, (() => void)[]> = { high: [], low: [] };
+	/** Start times of requests in the current rate-limit window, oldest first. */
+	#starts: number[] = [];
+	/** After a 429, no request starts before this time. */
+	#pausedUntil = 0;
+	#wakeTimer: ReturnType<typeof setTimeout> | null = null;
 
 	constructor(readonly config: CouplerIoCredentials) {}
 
-	async #request<T>(url: string, init: RequestInit = {}): Promise<T> {
-		// Small concurrency cap so a page's burst of queries doesn't trip the rate limit.
-		if (this.#active >= this.config.maxConcurrentRequests) {
-			await new Promise<void>((resolve) => this.#waiting.push(resolve));
-		}
-		this.#active++;
-		try {
-			const response = await fetch(url, {
-				...init,
-				headers: {
-					Authorization: `Bearer ${this.config.token}`,
-					'Content-Type': 'application/json',
-					Accept: 'application/json'
-				}
-			});
-			const text = await response.text();
-			if (!response.ok) throw new Error(errorMessage(response.status, text));
-			return JSON.parse(text) as T;
-		} finally {
-			this.#active--;
-			this.#waiting.shift()?.();
+	/**
+	 * Wait for a request slot: at most `maxConcurrentRequests` in flight and
+	 * RATE_LIMIT_REQUESTS started per window, high priority first.
+	 */
+	#acquire(priority: Priority): Promise<void> {
+		return new Promise((resolve) => {
+			this.#queues[priority].push(resolve);
+			this.#pump();
+		});
+	}
+
+	#release() {
+		this.#active--;
+		this.#pump();
+	}
+
+	#pump() {
+		while (this.#active < this.config.maxConcurrentRequests) {
+			const queue = this.#queues.high.length > 0 ? this.#queues.high : this.#queues.low;
+			if (queue.length === 0) return;
+			const now = Date.now();
+			while (this.#starts.length > 0 && now - this.#starts[0] >= RATE_LIMIT_WINDOW_MS) {
+				this.#starts.shift();
+			}
+			let wakeAt = this.#pausedUntil;
+			if (this.#starts.length >= RATE_LIMIT_REQUESTS) {
+				wakeAt = Math.max(wakeAt, this.#starts[0] + RATE_LIMIT_WINDOW_MS);
+			}
+			if (wakeAt > now) {
+				this.#wakeAt(wakeAt - now);
+				return;
+			}
+			// Take the slot here, not in the waiter, so a request starting before the
+			// waiter resumes can't also claim it.
+			this.#active++;
+			this.#starts.push(now);
+			queue.shift()!();
 		}
 	}
 
-	#api<T>(path: string): Promise<T> {
+	#wakeAt(delayMs: number) {
+		if (this.#wakeTimer) return;
+		this.#wakeTimer = setTimeout(() => {
+			this.#wakeTimer = null;
+			this.#pump();
+		}, delayMs);
+	}
+
+	async #request<T>(url: string, init: RequestInit = {}, priority: Priority = 'high'): Promise<T> {
+		for (let attempt = 0; ; attempt++) {
+			await this.#acquire(priority);
+			let response: Response;
+			let text: string;
+			try {
+				response = await fetch(url, {
+					...init,
+					headers: {
+						Authorization: `Bearer ${this.config.token}`,
+						'Content-Type': 'application/json',
+						Accept: 'application/json'
+					}
+				});
+				text = await response.text();
+			} finally {
+				this.#release();
+			}
+			if (response.status === 429 && attempt < MAX_RETRIES) {
+				// Pause every request, not just this one: the allowance is shared.
+				const delay = retryAfterMs(response) ?? RETRY_BASE_MS * 2 ** attempt;
+				this.#pausedUntil = Math.max(this.#pausedUntil, Date.now() + delay);
+				continue;
+			}
+			if (!response.ok) {
+				throw new CouplerIoApiError(response.status, errorMessage(response.status, text));
+			}
+			return JSON.parse(text) as T;
+		}
+	}
+
+	#api<T>(path: string, priority: Priority = 'high'): Promise<T> {
 		return this.#request<T>(
-			`${this.config.apiHost}/v1/workspaces/${encodeURIComponent(this.config.workspaceId)}${path}`
+			`${this.config.apiHost}/v1/workspaces/${encodeURIComponent(this.config.workspaceId)}${path}`,
+			{},
+			priority
 		);
 	}
 
@@ -141,23 +230,47 @@ class CouplerIoClient {
 		return value;
 	}
 
-	viewColumns(datasetId: string): Promise<CouplerIoViewColumn[]> {
+	viewColumns(datasetId: string, priority: Priority = 'high'): Promise<CouplerIoViewColumn[]> {
 		const cached = this.#views.get(datasetId);
-		if (cached && Date.now() - cached.at < CATALOG_TTL_MS) return cached.value;
-		const value = this.#api<DatasetResponse>(`/datasets/${encodeURIComponent(datasetId)}`).then(
-			(d) => {
+		// A query shouldn't wait behind a still-queued schema-browser fetch: issue its own.
+		const demoted = cached?.pendingLowPriority && priority === 'high';
+		if (cached && !demoted && Date.now() - cached.at < CATALOG_TTL_MS) return cached.value;
+		const entry: CachedView = {
+			at: Date.now(),
+			pendingLowPriority: priority === 'low',
+			value: this.#api<DatasetResponse>(
+				`/datasets/${encodeURIComponent(datasetId)}`,
+				priority
+			).then((d) => {
 				if (d.queryable === false) {
-					throw new Error(
+					throw new DatasetNotQueryableError(
 						`Coupler.io dataset "${d.name}" (${datasetId}) is not queryable (state: ${d.state}). Share it for analysis in the dataflow destination, or run the dataflow.`
 					);
 				}
 				return viewColumnsFromApi(d.columns ?? []);
+			})
+		};
+		this.#views.set(datasetId, entry);
+		entry.value.then(
+			() => (entry.pendingLowPriority = false),
+			() => {
+				if (this.#views.get(datasetId) === entry) this.#views.delete(datasetId);
 			}
 		);
-		this.#views.set(datasetId, { at: Date.now(), value });
-		value.catch(() => this.#views.delete(datasetId));
-		return value;
+		return entry.value;
 	}
+}
+
+type CachedView = Cached<CouplerIoViewColumn[]> & { pendingLowPriority: boolean };
+
+/** Retry-After (seconds or HTTP date) in ms, when the response has a usable one. */
+function retryAfterMs(response: Response): number | null {
+	const header = response.headers.get('retry-after');
+	if (!header) return null;
+	const seconds = Number(header);
+	if (Number.isFinite(seconds)) return Math.max(0, seconds * 1000);
+	const date = Date.parse(header);
+	return Number.isNaN(date) ? null : Math.max(0, date - Date.now());
 }
 
 function errorMessage(status: number, body: string): string {
@@ -169,7 +282,7 @@ function errorMessage(status: number, body: string): string {
 	}
 	if (status === 401) return `Coupler.io: API token is missing or invalid. ${message}`;
 	if (status === 429) {
-		return 'Coupler.io: API rate limit exceeded (100 requests/minute per organization). Wait a minute and retry.';
+		return 'Coupler.io: API rate limit exceeded (100 requests/minute per organization). Retried 3 times; wait a minute and reload.';
 	}
 	return `Coupler.io (${status}): ${message}`;
 }
@@ -205,15 +318,27 @@ async function catalogResult(
 			]
 		};
 	}
+	// One Show Dataset call per table, all queued at once at low priority: the
+	// client's scheduler paces them and lets page queries go first.
+	const columnsByTable = await Promise.all(
+		catalog.map((table) =>
+			client.viewColumns(table.datasetId, 'low').catch((e: unknown) => {
+				// An unreadable dataset shouldn't hide the rest of the catalog; auth,
+				// rate-limit, and server errors should.
+				const skippable =
+					e instanceof DatasetNotQueryableError ||
+					(e instanceof CouplerIoApiError && e.status === 404);
+				if (!skippable) throw e;
+				console.warn(
+					`[coupler-io] skipping table "${table.name}" in the schema: ${(e as Error).message}`
+				);
+				return [] as CouplerIoViewColumn[];
+			})
+		)
+	);
 	const rows: Record<string, unknown>[] = [];
-	for (const table of catalog) {
-		let columns: CouplerIoViewColumn[];
-		try {
-			columns = await client.viewColumns(table.datasetId);
-		} catch {
-			continue; // An unreadable dataset shouldn't hide the rest of the catalog.
-		}
-		for (const c of columns) {
+	for (const [i, table] of catalog.entries()) {
+		for (const c of columnsByTable[i]) {
 			rows.push({ tableName: table.name, columnName: c.name, columnType: c.duckType });
 		}
 	}

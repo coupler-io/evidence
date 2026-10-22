@@ -1,0 +1,19 @@
+cli/cli/org-warehouse.ts
+  s_dcceb408454b97::t_c0547da051d385 114-115
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "c584e23e3fca58461c8660165001604aa854733c",
+  "prompts": {},
+  "sessions": {
+    "s_dcceb408454b97": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "79504d4a-a364-46c1-832d-fd72e6fe8749",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Olexander Paladiy <olexander.paladiy@railsware.com>"
+    }
+  }
+}

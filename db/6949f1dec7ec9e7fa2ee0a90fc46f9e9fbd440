@@ -1,0 +1,54 @@
+cli/cli/connection/coupler-io.ts
+  s_5dead249652d5d::t_a528465934e558 2-5,8-9,34
+core/src/connectors/coupler-io/run-query.ts
+  s_5dead249652d5d::t_bd4e2fe3762081 1-76,78,81-87,89-154
+  s_5dead249652d5d::t_c580ca78a33867 77,79-80
+  s_5dead249652d5d::t_e96058f79c9e74 88
+cli/cli/connection/index.ts
+  s_5dead249652d5d::t_1445db069e1244 16-17
+core/src/connectors/coupler-io/run-query.test.ts
+  s_5dead249652d5d::t_4a64af3d8d3ab0 55-60,75-78,110,129-132
+  s_5dead249652d5d::t_61c507a1f1a2bd 1-54,61-74,79-109,111-128,133-136
+core/src/metadata/coupler-io-catalog.ts
+  s_5dead249652d5d::t_2ba6fa83153a83 1-16
+cli/cli/connection/index.test.ts
+  s_5dead249652d5d::t_1445db069e1244 3
+cli/cli/init/init.test.ts
+  s_5dead249652d5d::t_8a94a88ec4a4b4 308-325
+core/src/connectors/coupler-io/connection-schema.test.ts
+  s_5dead249652d5d::t_afc80d4ae553fc 1-72
+core/src/connectors/coupler-io/client.ts
+  s_5dead249652d5d::t_3e365b98d615ce 1-268
+core/src/metadata/Metadata.svelte.ts
+  s_5dead249652d5d::t_1445db069e1244 16
+core/src/connectors/coupler-io/connection-schema.ts
+  s_5dead249652d5d::t_f062cd2ff7c5d6 67,69-70,75-76
+  s_5dead249652d5d::t_3954cfbf5118db 3,13-16,71-74,116-120
+  s_5dead249652d5d::t_9fb9dd9f093368 106,127
+core/src/metadata/coupler-io-catalog.test.ts
+  s_5dead249652d5d::t_39cbe41d17f591 1-67
+docs/direct-connectors/coupler-io.mdx
+  s_5dead249652d5d::t_adea5ff382eb2b 55-56,59-72,74,77,80,82-83,85,88-91,95
+  s_5dead249652d5d::t_9fb9dd9f093368 86,92
+  s_5dead249652d5d::t_5e1843fd707ac4 96
+core/src/connectors/coupler-io/client.test.ts
+  s_5dead249652d5d::t_61c507a1f1a2bd 1-142
+core/src/connectors/coupler-io/credentials.ts
+  s_5dead249652d5d::t_f873abff2b9064 1-6,21-49
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "db6949f1dec7ec9e7fa2ee0a90fc46f9e9fbd440",
+  "prompts": {},
+  "sessions": {
+    "s_5dead249652d5d": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "d6d346ad-b353-47cc-8dfb-211194be174f",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Olexander Paladiy <olexander.paladiy@railsware.com>"
+    }
+  }
+}

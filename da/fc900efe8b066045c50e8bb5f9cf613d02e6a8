@@ -1,0 +1,91 @@
+cli/cli/connection/index.test.ts
+  s_5dead249652d5d::t_3055b051b01047 3-4,12-13,272-294
+cli/cli/connection/index.ts
+  s_5dead249652d5d::t_fc3ee7818ea9b8 16-17,51-52,171-173
+cli/cli/connection/load-config.ts
+  s_5dead249652d5d::t_89673117a52a64 25,41,199-204
+cli/cli/connection/types.ts
+  s_5dead249652d5d::t_b403250fc96c92 21,52-53,65-66
+cli/cli/init/connection-template.ts
+  s_5dead249652d5d::t_01c612c093b75e 26-27,186-197,209-210
+cli/cli/org-warehouse.ts
+  s_5dead249652d5d::t_9863ec140ecd1e 117-118
+core/src/connectors/connection-schema.ts
+  s_5dead249652d5d::t_0ef96d71c78de5 53-57,154-156,169-170,184-185,200-201,214-215
+core/src/connectors/coupler-io/client.test.ts
+  s_5dead249652d5d::t_6424132f130bb5 1-225
+core/src/connectors/coupler-io/client.ts
+  s_5dead249652d5d::t_a8250238d24af9 1-325
+core/src/connectors/coupler-io/connection-schema.ts
+  s_5dead249652d5d::t_67dd3932b4f22c 1-136
+core/src/connectors/coupler-io/credentials.ts
+  s_5dead249652d5d::t_df4ecaf5cbba28 1-49
+core/src/connectors/coupler-io/resolve.ts
+  s_5dead249652d5d::t_99938296f24ad3 1-54
+core/src/connectors/coupler-io/run-query.test.ts
+  s_5dead249652d5d::t_e3da3616d07dfd 1-203
+core/src/connectors/coupler-io/run-query.ts
+  s_5dead249652d5d::t_3cb937c99bea48 1-175
+core/src/connectors/coupler-io/sql.test.ts
+  s_5dead249652d5d::t_5dff4e2c328eea 1-317
+core/src/connectors/coupler-io/sql.ts
+  s_5dead249652d5d::t_79ed3d8d538f5c 1-404
+core/src/connectors/schema-allowlist.ts
+  s_5dead249652d5d::t_15f7b3533231c7 18-20,22-23
+core/src/connectors/warehouse-mode.ts
+  s_5dead249652d5d::t_c9fa050c1862de 19-20
+core/src/metadata/Metadata.svelte.ts
+  s_5dead249652d5d::t_5cb33ceff12cef 16,272-273,323-326,803-841
+core/src/metadata/coupler-io-catalog.ts
+  s_5dead249652d5d::t_da54a495478bef 1-16
+core/src/metadata/inline-query-metadata.svelte.ts
+  s_5dead249652d5d::t_214bf8cf002106 160-161
+core/src/sql-dialect.test.ts
+  s_5dead249652d5d::t_7f0b5f0ed8b854 14,1190-1215
+core/src/sql-dialect.ts
+  s_5dead249652d5d::t_d4eca340439dd1 21,34,50-51,75-76
+core/src/sql-dialect/coupler-io.ts
+  s_dcceb408454b97::t_06ac8b61f900c9 1-14
+core/src/user-components/tags/table_filter/table_filter.markdoc.spec.ts
+  s_5dead249652d5d::t_68f4ee2e96494a 456-457,594-595,609-610
+docs/direct-connectors/coupler-io.mdx
+  s_5dead249652d5d::t_fda6b357e8f37e 1-107
+docs/docs.json
+  s_5dead249652d5d::t_87034d8b660c9c 810-811
+cli/cli/connection/coupler-io.ts
+  s_5dead249652d5d::t_7d22c4e2638e89 1-37
+cli/cli/connection/load-config.test.ts
+  s_5dead249652d5d::t_d15e5c55bb3b5d 336-455
+cli/cli/init/init.test.ts
+  s_5dead249652d5d::t_a8b5639c1e1729 308-325
+cli/cli/launch.ts
+  s_5dead249652d5d::t_43953c4ff8c835 423-426
+core/src/connectors/coupler-io/connection-schema.test.ts
+  s_5dead249652d5d::t_f985823aa7531c 1-72
+core/src/metadata/coupler-io-catalog.test.ts
+  s_5dead249652d5d::t_c8c5af7b8aa8a3 1-67
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "dafc900efe8b066045c50e8bb5f9cf613d02e6a8",
+  "prompts": {},
+  "sessions": {
+    "s_5dead249652d5d": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "d6d346ad-b353-47cc-8dfb-211194be174f",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Olexander Paladiy <olexander.paladiy@railsware.com>"
+    },
+    "s_dcceb408454b97": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "79504d4a-a364-46c1-832d-fd72e6fe8749",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Olexander Paladiy <olexander.paladiy@railsware.com>"
+    }
+  }
+}
